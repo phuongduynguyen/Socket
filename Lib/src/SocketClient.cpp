@@ -1,38 +1,38 @@
 #include "SocketClient.h"
 
-void SocketClient::doConnect()
+void SocketClient::doConnect(const std::string& socketName)
 {
-    if (m_connectingFlag) {
+    if (mIsConnecting) {
         return;
     }
-
-    m_connectingFlag = true;
+    mSocketPath = socketName;
+    mIsConnecting = true;
     std::function<void(void)> task = [this]() {
-        m_peerSocket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
-        std::cout << "doConnect() with peer socket: " << m_peerSocket << "\n";
-        if (m_peerSocket < 0){
-            std::cout << "Cant create socket - error: " << m_peerSocket << "\n";
+        mPeerSocket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+        std::cout << "doConnect() with peer socket: " << mPeerSocket << "\n";
+        if (mPeerSocket < 0){
+            std::cout << "Cant create socket - error: " << mPeerSocket << "\n";
             return;
         }
 
-        while(m_connectingFlag) {
+        while(mIsConnecting) {
             struct sockaddr_un addr;
             int ret;
             memset(&addr, 0, sizeof(addr));
             addr.sun_family = static_cast<unsigned short int>(AF_UNIX);
-            strncpy(addr.sun_path, m_unixAddr.c_str(), sizeof(addr.sun_path) - 1U);
+            strncpy(addr.sun_path, mSocketPath.c_str(), sizeof(addr.sun_path) - 1U);
             addr.sun_path[0] = '\0';
             
-            ret = connect(m_peerSocket, (const struct sockaddr *) &addr, static_cast<unsigned int>(sizeof(addr)));
+            ret = connect(mPeerSocket, (const struct sockaddr *) &addr, static_cast<unsigned int>(sizeof(addr)));
             if (ret < 0) {
                 std::cout << "Cant connect socket - error: " << ret << "\n";
-                if (m_connectingFlag) {
+                if (mIsConnecting) {
                     usleep(1000000U);
                 }
             }
             else if (ret == 0) {
                 mIsConnected = true;
-                m_connectingFlag = false;
+                mIsConnecting = false;
                 break;
             }
         }
@@ -61,11 +61,11 @@ void SocketClient::sendMessage(const std::string& message)
                         message.c_str());
 
     if (msgLen > 0) {
-        ssize_t ret = write(m_peerSocket,messageBuf,static_cast<size_t>(msgLen+1));
+        ssize_t ret = write(mPeerSocket,messageBuf,static_cast<size_t>(msgLen+1));
         if (ret == -1) {
             mIsConnected = false;
             std::cout << "Cant write message, reconnect.... \n";
-            doConnect();
+            doConnect(mSocketPath);
         }
     }
 }

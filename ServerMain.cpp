@@ -2,6 +2,6 @@
 
 int main()
 {
-    SocketServer::doInitialize();
+    SocketServer::doInitialize("DuySocket");
     return SocketServer::getInstance().doStart();
 }

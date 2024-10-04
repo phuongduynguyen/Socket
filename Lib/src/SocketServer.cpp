@@ -70,10 +70,10 @@ static void terminateSignalHandler(int signal) {
     }
 }
 
-void SocketServer::doInitialize()
+void SocketServer::doInitialize(const std::string& socketName)
 {
     if (gInstance == nullptr) {
-        gInstance = new SocketServer();
+        gInstance = new SocketServer(socketName);
     }
 }
 
@@ -85,7 +85,7 @@ SocketServer& SocketServer::getInstance()
     return *gInstance;
 }
 
-SocketServer::SocketServer()
+SocketServer::SocketServer(const std::string& socketName) : mSocketPath(socketName)
 {
 
 }
@@ -117,7 +117,7 @@ int SocketServer::doStart()
 
     memset(&address, 0, sizeof(address));
     address.sun_family = static_cast<unsigned short int>(AF_UNIX);
-    strncpy(address.sun_path, mSocketPath, sizeof(address.sun_path) - 1U);
+    strncpy(address.sun_path, mSocketPath.c_str(), sizeof(address.sun_path) - 1U);
     address.sun_path[0]='\0';
     ret = bind(serverSocket, (const struct sockaddr *) &address, static_cast<int>(sizeof(address)));
     
@@ -177,7 +177,7 @@ void SocketServer::consumerHandler()
         foundItem++;
     }
 
-    ret = listen(mClients.front(), 30);
+    ret = listen(mClients.front(), 1);
     if(ret == ERROR) {
         std::cout << "Cant listen socket client\n";
         return;

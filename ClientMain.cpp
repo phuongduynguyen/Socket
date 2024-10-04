@@ -4,7 +4,7 @@ int main()
 {
     std::cout << "Current PID: " << getpid() << std::endl;
     SocketClient client;
-    client.doConnect();
+    client.doConnect("DuySocket");
     std::string input;
 
     while (true)

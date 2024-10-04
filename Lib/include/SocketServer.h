@@ -21,19 +21,19 @@
 class SocketServer final
 {
     public:
-        static void doInitialize();
+        static void doInitialize(const std::string& socketName);
         static SocketServer& getInstance();
 
         int doStart();
         void doClose();
 
     private:
-        explicit SocketServer();
+        explicit SocketServer(const std::string& socketName);
         ~SocketServer();
 
         void consumerHandler();
 
-        const char* mSocketPath = "LogCat";
+        std::string mSocketPath;
         std::vector<int> mClients;
         volatile bool mRunning;
         std::mutex mMutex;

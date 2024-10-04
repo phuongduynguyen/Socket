@@ -19,13 +19,13 @@
 class SocketClient
 {
     public:
-        void doConnect();
+        void doConnect(const std::string& socketName);
         void sendMessage(const std::string& message);
 
     private:
-        std::string m_unixAddr = "LogCat";
-        volatile int m_peerSocket = -1;
+        std::string mSocketPath;
+        volatile int mPeerSocket = -1;
         volatile bool mIsConnected = false;
-        volatile bool m_connectingFlag = false;
+        volatile bool mIsConnecting = false;
 };
 #endif
